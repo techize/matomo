@@ -1,5 +1,7 @@
 # Installing Matomo Analytics software
 
+This can be found on the <https://techhowtos.wiki> site, along with other brain dump tips and ramblings.
+
 Matomo is an opensource google analytics style solution.  As Im running the tech howto wiki now, I want to see what sort of traffic (if any) I get on the site.  So instead of using google analytics I thought I would go with Matomo.
 
 In the style of automation, im going to do this as a playbook.  Right from scratch (well almost from scratch - should really terraform the infra build, and then do CICD with it, but thats an expansion for another time), im going to set this up with Ansible.
