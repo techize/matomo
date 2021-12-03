@@ -1,0 +1,14 @@
+do:
+  hosts:
+    analytics:
+      ansible_host: 138.68.131.170
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      ansible_user: root
+      host_key_checking: false
+
+    wiki:
+      ansible_host: 142.93.34.244
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      ansible_user: root
+      host_key_checking: false
+  

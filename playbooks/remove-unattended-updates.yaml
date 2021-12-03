@@ -1,0 +1,31 @@
+---
+#
+# Setup automatic updates
+#
+- name: Install and setup unattended upgrades
+  become: true
+  hosts: all
+  tasks:
+    # do a quick apt update to bring cache uptodate, granted we dont actually need to do this, but good habit to get into I feel. 
+    - name: Apt Update
+      apt: 
+        update-cache: yes
+    - name: remove the unattended updates package
+      apt:
+        name: unattended-updates
+        state: absent
+    - name: purge cache
+      apt:
+        autoclean: yes
+    - name: purge unused dependancies
+      apt:
+        autoremove: yes    
+    - name: ensure the configuration for unattended upgrades is removed.
+      file:
+        state: absent
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+    - name: remove the unattended upgrades line from auto-upgradres
+      ansible.builtin.lineinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        regexp: '^APT\:\:Periodic\:\:Unattended-Upgrade'
+        state: absent

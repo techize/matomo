@@ -1,0 +1,81 @@
+---
+#
+# Setup the db
+#
+- name: Set the root password up.
+  become: true
+  hosts: all
+  tasks:
+  - name: Include only files matching vault.yml (2.2)
+    include_vars:
+      dir: ../vars
+      files_matching: vault.yml
+  
+# This command will exit non-zero if the root password was set previously
+  - name: Check if root password is unset
+    shell: >
+      mysql -u root
+      -p'{{ mysql_root_pass }}'
+      -h localhost
+      -S /var/run/mysqld/mysqld.sock
+      -e "quit"
+    changed_when: false
+    ignore_errors: true
+    register: root_pwd_check
+
+# Repeat runs with the same password can continue idempotently, otherwise fail.
+  - name: Check if the specified root password is already set
+    shell: >
+      mysqladmin -u root -p{{ mysql_root_pass }} status
+    changed_when: false
+    when: root_pwd_check.rc == 0
+
+  - name: Set MySQL root password for the first time (root@localhost)
+    mysql_user:
+      login_host: 'localhost'
+      login_user: 'root'
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      #login_password: ''
+      name: 'root'
+      password: '{{ mysql_root_pass }}'
+      state: present
+    when: root_pwd_check.rc != 0
+
+- name: Configure the matomo database  
+  become: true
+  hosts: all
+  tasks:
+  - name: Include only files matching vault.yml (2.2)
+    include_vars:
+      dir: ../vars
+      files_matching: vault.yml
+  
+  - name: create database
+    mysql_db:
+      name: matomo
+      login_host: 'localhost'
+      login_user: 'root'
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      login_password: '{{ mysql_root_pass }}'
+  
+  - name: create matomo user
+    mysql_user:
+      login_host: 'localhost'
+      login_user: 'root'
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      login_password: '{{ mysql_root_pass }}'
+      name: matomo
+      password: '{{ matomo_mysql_pass }}'
+      state: present
+      priv: 'matomo.*:ALL'
+  - name: Grant file privilege as well.
+    mysql_user:
+      login_host: 'localhost'
+      login_user: 'root'
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      login_password: '{{ mysql_root_pass }}'
+      name: matomo
+      append_privs: yes
+      state: present
+      priv: '*.*:FILE'
+      

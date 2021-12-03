@@ -1,0 +1,27 @@
+---
+#
+# Change ownership and permissions on some files and folders
+#
+- name: Update Permissions
+  become: true
+  hosts: analytics
+  tasks:
+  - name: Update permissions
+    ansible.builtin.shell: |
+      chown -R www-data:www-data /var/www/analytics.techize.co.uk
+      find /var/www/analytics.techize.co.uk/tmp -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp -type d -exec chmod 755 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/assets/ -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/assets/ -type d -exec chmod 755 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/cache/ -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/cache/ -type d -exec chmod 755 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/logs/ -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/logs/ -type d -exec chmod 755 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/tcpdf/ -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/tcpdf/ -type d -exec chmod 755 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/templates_c -type f -exec chmod 644 {} \;
+      find /var/www/analytics.techize.co.uk/tmp/templates_c -type d -exec chmod 755 {} \;  
+  - name: Remove index.html
+    file:
+      state: absent
+      path: /var/www/analytics.techize.co.uk/index.html

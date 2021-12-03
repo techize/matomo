@@ -1,0 +1,68 @@
+---
+#
+# Install package updates on servers
+#
+
+- name: upgrade packages and reboot (if necessary)
+  become: true
+  hosts: all
+  tasks: # tasks are done in order
+    # do an "apt-get update", to ensure latest package lists
+    - name: apt-get update
+      apt:
+        update-cache: yes
+      changed_when: 0
+
+    # do the actual apt-get dist-upgrade
+    - name: apt-get dist-upgrade
+      apt:
+        upgrade: dist # upgrade all packages to latest version
+      register: upgrade_output
+
+    # if a new kernel is incoming, remove old ones to avoid full /boot
+    - name: apt-get autoremove
+      command: apt-get -y autoremove
+      args:
+        warn: false
+      changed_when: 0
+
+    # check if we need a reboot
+    - name: check if reboot needed
+      stat: path=/var/run/reboot-required
+      register: file_reboot_required
+
+    # "meta: end_play" aborts the rest of the tasks in the current «tasks:»
+    # section, for the current server
+    # "when:" clause ensures that the "meta: end_play" only triggers if the
+    # current webserver does _not_ need a reboot
+    - meta: end_play
+      when: not file_reboot_required.stat.exists
+
+    # because of the above meta/when we at this point know that the current
+    # host needs a reboot
+
+    - name: reboot node
+      shell: sleep 2 && shutdown -r now "Reboot triggered by ansible"
+      async: 1
+      poll: 0
+      ignore_errors: true
+
+    # poll ssh port until we get a tcp connect
+    - name: wait for node to finish booting
+      wait_for_connection:
+        delay: 60
+        timeout: 300
+
+    #- name: waiting for SSH to be in a sensible state
+    #  wait_for:
+    #    timeout: 120
+    #    delay: 10
+    #    port: 22
+    #    host: "{{ inventory_hostname }}"
+    #  delegate_to: localhost
+    
+    # wait a few minutes between hosts, unless we're on the last
+    #- name: waiting between hosts
+    #  pause:
+    #    minutes: 10
+    #  when: inventory_hostname != ansible_play_hosts[-1]

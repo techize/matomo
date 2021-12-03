@@ -1,0 +1,12 @@
+- hosts: analytics
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: letsencrypt
+      vars:
+        letsencrypt_email: jonathan@techize.co.uk
+        main_domain_name: analytics.techize.co.uk
+        all_domain_names:
+          - analytics.techize.co.uk
+        deploy_sample_html: true

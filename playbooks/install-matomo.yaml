@@ -1,0 +1,28 @@
+---
+#
+# Download and install the Matomo application.
+#
+# we know from previous setup that the install directory is /var/www/<domain>/ so thats where we want to unpack files.
+#
+- name: Download and install Matomo
+  become: true
+  hosts: analytics
+  tasks:
+  - name: Download zip file.
+    get_url: 
+      url: https://builds.matomo.org/matomo.zip
+      dest: /tmp/matomo.zip
+
+  # now unzip the file in /tmp and then move all files in the /tmp/matomo directory created into the web root.
+  
+  - name: unzip downloaded matomo file.
+    unarchive:
+      src: /tmp/matomo.zip
+      dest: /tmp
+      remote_src: yes      
+
+  - name: copy files to web root
+    copy:
+      remote_src: yes
+      src: /tmp/matomo/
+      dest: /var/www/analytics.techize.co.uk/    

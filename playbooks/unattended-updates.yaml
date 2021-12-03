@@ -1,0 +1,44 @@
+---
+#
+# Setup automatic updates
+#
+- name: Install and setup unattended upgrades
+  become: true
+  hosts: all
+  tasks:
+    # do a quick apt update to bring cache uptodate
+    - name: Apt Update
+      apt: 
+        update-cache: yes
+    
+    # install unattended updates now.
+    - name: Install unattended updates package
+      apt: 
+        package: unattended-upgrades
+        state: present
+
+    # configure the config file to use the right email address, and other settings.    
+    - name: configure email address to send notifications to.
+      ansible.builtin.lineinfile: 
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '\/\/Unattended-Upgrade\:\:Mail \"\"\;'
+        line: 'Unattended-Upgrade::Mail "unattended-upgrades@techize.co.uk";'
+
+    - name: configure email notifications to be sent always.
+      ansible.builtin.lineinfile: 
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '\/\/Unattended-Upgrade\:\:MailReport \"on-change\"\;'
+        line: 'Unattended-Upgrade::MailReport "always";'
+
+    - name: configure unused dependancies to be removed
+      ansible.builtin.lineinfile: 
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '\/\/Unattended-Upgrade\:\:Remove-Unused-Dependencies\"false\"\;'
+        line: 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+
+    - name: Verbose logging
+      ansible.builtin.lineinfile: 
+        path: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '\/\/Unattended-Upgrade\:\:Verbose\"false\"\;'
+        line: 'Unattended-Upgrade::Verbose "true";'
+

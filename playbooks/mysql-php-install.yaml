@@ -1,0 +1,31 @@
+---
+
+#
+# Setup pre-reqs
+#
+- name: Install pre-requisites
+  become: true
+  hosts: all
+  tasks:
+    # do a quick apt update to bring cache uptodate
+    - name: Apt Update
+      apt: 
+        update-cache: yes
+    
+    # install pre-reqs now.
+    - name: Install pre-requisites
+      apt: 
+        package: 
+        - php
+        - php-curl
+        - php-gd
+        - php-cli
+        - mysql-server
+        - mysql-client
+        - php-mysql
+        - php-xml
+        - php-mbstring
+        - python3-pymysql
+        - php7.4-fpm
+        - php-pear
+        state: present

@@ -1,0 +1,28 @@
+---
+#
+# Remove Apache2 from the system.  Will add Nginx with a different playbook later.
+#
+- name: Remove Apache from the server
+  become: true
+  hosts: all # restricted by the inventory
+  tasks:
+  - name: remove apache
+    apt:
+      name: apache2
+      state: absent
+  - name: purge cache
+    apt:
+      autoclean: yes
+  - name: purge unused dependancies
+    apt:
+      autoremove: yes    
+
+  - name: remove files for config and web.
+    file:
+      state: absent
+      path: /var/www
+  - name: remove files for config and web.
+    file:
+      state: absent
+      path: /etc/apache2
+      
